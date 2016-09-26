@@ -143,6 +143,7 @@ module.exports = function(grunt) {
         var relativeSourceMapPath = stripPrefixAndNormalise(sourceMapPath, options.srcBasePath),
             relativeDestSourceMapPath = stripPrefixAndNormalise(destSourceMapPath, options.destBasePath);
         sourceFileMapping[relativeSourceMapPath] = relativeDestSourceMapPath;
+        fixSourceMapComment(destPath, relativeSourceMapPath, relativeDestSourceMapPath);
         grunt.log.writeln('Copied source map: ' + destSourceMapPath);
       }
 
@@ -164,6 +165,12 @@ module.exports = function(grunt) {
 
     function sourceMapExtname(filepath) {
       return filepath.match(/(\.(js|css)\.map)$/)[1];
+    }
+
+    function fixSourceMapComment(sourceFile, orig, hashed) {
+      var contents = fs.readFileSync(sourceFile, 'utf8');
+      contents = contents.replace('sourceMappingURL=' + orig, 'sourceMappingURL=' + hashed);
+      fs.writeFileSync(sourceFile, contents);
     }
 
     // Write the accompanying json file that maps non-hashed assets to their hashed locations.
